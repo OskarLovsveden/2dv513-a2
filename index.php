@@ -1,21 +1,43 @@
 <?php
-set_time_limit(300);
+set_time_limit(0);
+ignore_user_abort(1);
+ini_set('mysql.connect_timeout', 300);
+ini_set('default_socket_timeout', 300);
 
 require_once('Database.php');
-require_once('TableMaker.php');
 require_once('TableExporter.php');
 
 echo "helllo world";
 
 $db = new \Database();
-$tableMaker = new \TableMaker();
 $tableExporter = new \TableExporter($db);
 
 // Data
-$file = __DIR__ . "/jsonData/RC_2007-10.bz2";
+$file = __DIR__ . "/jsonData/RC_2011-07.bz2";
 
 // Start time
 $start = microtime(true);
+
+// TEST
+$titles = array(
+    'id',
+    'name',
+    'parent_id',
+    'link_id',
+    'author',
+    'body',
+    'subreddit_id',
+    'subreddit',
+    'score',
+    'created_utc'
+);
+
+// Create and open tempfile
+$name = tempnam('/tmp/php', 'csv');
+$fp = fopen($name, 'w');
+
+// Write titles
+fputcsv($fp, $titles);
 
 // Open bz2 file in "read-mode"
 $bz = bzopen($file, "r");
@@ -23,27 +45,38 @@ $bz = bzopen($file, "r");
 // Read bz2
 while (!feof($bz)) {
     $line = fgets($bz);
+
+    // TEST
     $obj = json_decode($line);
 
-    // Pass PHP object to TableMaker to be filtered
-    $tableMaker->addToPostFields($obj);
-    $tableMaker->addToFullnameFields($obj);
-    $tableMaker->addToSubredditFields($obj);
+    $arr = array(
+        $obj->id,
+        $obj->name,
+        $obj->parent_id,
+        $obj->link_id,
+        $obj->author,
+        $obj->body,
+        $obj->subreddit_id,
+        $obj->subreddit,
+        $obj->score,
+        $obj->created_utc
+    );
+
+    fputcsv($fp, $arr);
 }
+
+// CLOSE TEST
+fclose($fp);
 
 // Close bz2 file
 bzclose($bz);
 
-// Get arrays of fields
-$posts = $tableMaker->getPostFields();
-$fullnames = $tableMaker->getFullnameFields();
-$subreddits = $tableMaker->getSubredditFields();
+// TEST
+$tableExporter->exportToDB($name);
 
-// Export tables into DB via TableExporter
-$tableExporter->exportToDB($posts, 'post');
-$tableExporter->exportToDB($fullnames, 'fullname');
-$tableExporter->exportToDB($subreddits, 'subreddit');
+// UNLINK TEST
+unlink($name);
 
 // Calculate time
 $time_elapsed_secs = microtime(true) - $start;
-// echo $time_elapsed_secs;
+echo $time_elapsed_secs;
