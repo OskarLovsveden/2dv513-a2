@@ -8,22 +8,21 @@ $dbConn = $db->getDbConnection();
 echo "helllo world";
 
 $file = __DIR__ . "/jsonData/RC_2007-10.bz2";
-// Ta grejer från fil
 
-$bz = bzopen($file, "r");
 $start = microtime(true);
-$count = 0;
-$arrayen = array();
 
-$lineStart = 'xxx_csv_start';
+// Array for saving fields as data
+$fields = array();
 
-// Read bz2
+// Open bz2 file in "read-mode"
+$bz = bzopen($file, "r");
+
+// Read and convert bz2 to json
 while (!feof($bz)) {
     $line = fgets($bz);
     $obj = json_decode($line);
 
-    $arrayen[] = array(
-        // $lineStart . $obj->id,
+    $fields[] = array(
         $obj->id,
         $obj->parent_id,
         $obj->link_id,
@@ -33,42 +32,37 @@ while (!feof($bz)) {
         $obj->score,
         $obj->created_utc
     );
-    $count++;
 }
+
+// Close bz2 file
 bzclose($bz);
 
-$posts = __DIR__ . "/jsonData/posts.csv";
-$postTable = 'post';
+// Use csv file
+// $path = "posts.csv";
+// $fp = fopen($path, "w");
 
-// $fullname = __DIR__ . "/jsonData/fullname.csv";
-// $fullnameTable = 'fullname';
+// Use temp file with csv prefix
+$path = tempnam('/tmp/php', 'csv');
+$fp = fopen($path, 'w');
 
-// $subreddit = __DIR__ . "/jsonData/subreddit.csv";
-// $subredditTable = 'subreddit';
-
-$fp = fopen($posts, "w");
-foreach ($arrayen as $fields) {
-    fputcsv($fp, $fields);
+foreach ($fields as $field) {
+    fputcsv($fp, $field);
 }
+
+// Close file
 fclose($fp);
 
 if (!$dbConn->query(
-    "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($dbConn, $posts) . "' INTO TABLE $postTable FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'"
-    // "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($dbConn, $posts) . "' INTO TABLE $postTable FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES STARTING BY '$lineStart'"
+    "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($dbConn, $path) . "' INTO TABLE post FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'"
 )) {
     echo $dbConn->error;
 }
 
+// Remove file if using csv file
+unlink($path);
+
+// Remove temp file with csv prefix
+unlink($path);
+
 $time_elapsed_secs = microtime(true) - $start;
-/* echo $count;
-echo "</br>";
-echo $time_elapsed_secs; */
-
-
-// JsonToSQLstuff
-
-// create post
-
-// insert (post)
-
-//  insert int
+// echo $time_elapsed_secs;
