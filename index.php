@@ -7,48 +7,56 @@ $dbConn = $db->getDbConnection();
 
 echo "helllo world";
 
-$file = __DIR__."/jsonData/RC_2007-10.bz2";
+$file = __DIR__ . "/jsonData/RC_2007-10.bz2";
 // Ta grejer från fil
 
 $bz = bzopen($file, "r");
 $start = microtime(true);
 $count = 0;
 $arrayen = array();
+
+$lineStart = 'xxx_csv_start';
+
 // Read bz2
 while (!feof($bz)) {
     $line = fgets($bz);
     $obj = json_decode($line);
 
     $arrayen[] = array(
+        // $lineStart . $obj->id,
         $obj->id,
-        $obj->name
+        $obj->parent_id,
+        $obj->link_id,
+        $obj->author,
+        $obj->body,
+        $obj->subreddit_id,
+        $obj->score,
+        $obj->created_utc
     );
     $count++;
 }
 bzclose($bz);
 
-$csv = __DIR__."/jsonData/posts.csv";
-echo $csv;
+$posts = __DIR__ . "/jsonData/posts.csv";
+$postTable = 'post';
 
-/* $fp = fopen($csv, "w");
+// $fullname = __DIR__ . "/jsonData/fullname.csv";
+// $fullnameTable = 'fullname';
+
+// $subreddit = __DIR__ . "/jsonData/subreddit.csv";
+// $subredditTable = 'subreddit';
+
+$fp = fopen($posts, "w");
 foreach ($arrayen as $fields) {
     fputcsv($fp, $fields);
-} */
-/* 
-$obj->parent_id,
-$obj->link_id,
-$obj->author,
-$obj->body,
-$obj->subreddit_id,
-$obj->score,
-$obj->created_utc */
-/* fclose($fp); */
+}
+fclose($fp);
 
 if (!$dbConn->query(
-    "LOAD DATA LOCAL INFILE '". mysqli_escape_string($dbConn, $csv) ."' INTO TABLE fullname FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n'"
-)) 
-{
-    echo $dbConn->error . " HEJ";
+    "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($dbConn, $posts) . "' INTO TABLE $postTable FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'"
+    // "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($dbConn, $posts) . "' INTO TABLE $postTable FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES STARTING BY '$lineStart'"
+)) {
+    echo $dbConn->error;
 }
 
 $time_elapsed_secs = microtime(true) - $start;
