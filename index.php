@@ -59,7 +59,7 @@ if (!$dbConn->query(
 }
 
 // Remove file if using csv file
-unlink($path);
+// unlink($path);
 
 // Remove temp file with csv prefix
 unlink($path);
