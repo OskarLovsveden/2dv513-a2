@@ -13,12 +13,13 @@ class Database {
 
     public function __construct() {
         $this->dbConnection = $this->createDbConnection();
+        // $this->dbConnection->set_charset("utf8");
 
         if ($this->dbConnection->connect_error) {
             die("Connection failed: " . $this->dbConnection->connect_error);
         }
 
-        $this->dbConnection->options(MYSQLI_OPT_LOCAL_INFILE, TRUE);
+        // $this->dbConnection->options(MYSQLI_OPT_LOCAL_INFILE, TRUE);
 
         $this->createFullnameTableIfNotExist();
         $this->createPostTableIfNotExist();
@@ -29,14 +30,19 @@ class Database {
         return $this->dbConnection;
     }
 
-    private function createDbConnection(): \mysqli {
-        return new mysqli(
+    public function createDbConnection(): \mysqli {
+        $conn = new mysqli(
             self::$host,
             self::$user,
             self::$password,
             self::$db,
             self::$port
         );
+
+        $conn->options(MYSQLI_OPT_LOCAL_INFILE, TRUE);
+        $conn->set_charset("utf8");
+
+        return $conn;
     }
 
     private function createSubredditTableIfNotExist() {
