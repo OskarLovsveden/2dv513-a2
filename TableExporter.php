@@ -49,6 +49,7 @@ class TableExporter {
                 $obj->score,
                 $obj->created_utc
             );
+            
 
             fputcsv($fp, $arr);
         }
@@ -72,7 +73,7 @@ class TableExporter {
         // NR 2
         $conn1 = $this->db->createDbConnection();
         if (!$conn1->query(
-            "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($conn1, $name) . "' INTO TABLE fullname FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (id, name, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)"
+            "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($conn1, $name) . "' INTO TABLE fullname FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES (id, name, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)"
         )) {
             echo $conn1->error;
         }
@@ -81,7 +82,7 @@ class TableExporter {
         // NR 2
         $conn2 = $this->db->createDbConnection();
         if (!$conn2->query(
-            "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($conn2, $name) . "' INTO TABLE subreddit FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (@dummy,  @dummy, @dummy, @dummy, @dummy, @dummy, subreddit_id, subreddit, @dummy, @dummy)"
+            "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($conn2, $name) . "' INTO TABLE subreddit FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES (@dummy,  @dummy, @dummy, @dummy, @dummy, @dummy, subreddit_id, subreddit, @dummy, @dummy)"
         )) {
             echo $conn2->error;
         }
@@ -90,7 +91,7 @@ class TableExporter {
          // NR 1
          $conn3 = $this->db->createDbConnection();
          if (!$conn3->query(
-             "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($conn3, $name) . "' INTO TABLE post FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 3 LINES (id,  @dummy, parent_id, link_id, author, body, subreddit_id, @dummy, score, created_utc)"
+             "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($conn3, $name) . "' INTO TABLE post FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 3 LINES (id,  @dummy, parent_id, link_id, author, body, subreddit_id, @dummy, score, created_utc)"
          )) {
              echo $conn3->error;
          }
