@@ -2,6 +2,7 @@
 
 class TableExporter {
     private $db;
+
     private static $file = __DIR__ . "/jsonData/RC_2011-07.bz2";
     private static $titles = array(
         'id',
@@ -34,7 +35,6 @@ class TableExporter {
         while (!feof($bz)) {
             $line = fgets($bz);
 
-            // TEST
             $obj = json_decode($line);
 
             $arr = array(
@@ -56,7 +56,7 @@ class TableExporter {
         fclose($fp);
         bzclose($bz);
 
-        // TEST
+        // Export to DB
         $this->exportToDB($name);
 
         // UNLINK TEST
@@ -69,7 +69,7 @@ class TableExporter {
 
     private function exportToDB($name) {
 
-        // NR 2
+        // Fullname
         $conn1 = $this->db->createDbConnection();
         if (!$conn1->query(
             "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($conn1, $name) . "' INTO TABLE fullname FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (id, name, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)"
@@ -78,7 +78,7 @@ class TableExporter {
         }
         mysqli_close($conn1);
 
-        // NR 2
+        // Subreddit
         $conn2 = $this->db->createDbConnection();
         if (!$conn2->query(
             "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($conn2, $name) . "' INTO TABLE subreddit FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (@dummy,  @dummy, @dummy, @dummy, @dummy, @dummy, subreddit_id, subreddit, @dummy, @dummy)"
@@ -87,13 +87,13 @@ class TableExporter {
         }
         mysqli_close($conn2);
 
-         // NR 1
-         $conn3 = $this->db->createDbConnection();
-         if (!$conn3->query(
-             "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($conn3, $name) . "' INTO TABLE post FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 3 LINES (id,  @dummy, parent_id, link_id, author, body, subreddit_id, @dummy, score, created_utc)"
-         )) {
-             echo $conn3->error;
-         }
-         mysqli_close($conn3);
+        // Post
+        $conn3 = $this->db->createDbConnection();
+        if (!$conn3->query(
+            "LOAD DATA LOCAL INFILE '" . mysqli_escape_string($conn3, $name) . "' INTO TABLE post FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' IGNORE 3 LINES (id,  @dummy, parent_id, link_id, author, body, subreddit_id, @dummy, score, created_utc)"
+        )) {
+            echo $conn3->error;
+        }
+        mysqli_close($conn3);
     }
 }
