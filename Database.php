@@ -12,22 +12,9 @@ class Database {
     private static $postTable = 'post';
 
     public function __construct() {
-        $this->dbConnection = $this->createDbConnection();
-        // $this->dbConnection->set_charset("utf8");
-
-        if ($this->dbConnection->connect_error) {
-            die("Connection failed: " . $this->dbConnection->connect_error);
-        }
-
-        // $this->dbConnection->options(MYSQLI_OPT_LOCAL_INFILE, TRUE);
-
         $this->createFullnameTableIfNotExist();
         $this->createSubredditTableIfNotExist();
         $this->createPostTableIfNotExist();
-    }
-
-    public function getDbConnection(): \mysqli {
-        return $this->dbConnection;
     }
 
     public function createDbConnection(): \mysqli {
@@ -46,12 +33,14 @@ class Database {
     }
 
     private function createSubredditTableIfNotExist() {
+        $conn = $this->createDbConnection();
+
         $createTable = 'CREATE TABLE IF NOT EXISTS ' . self::$subreddit . ' (
                 subreddit VARCHAR(21),
                 subreddit_id VARCHAR(50)
             )';
 
-        if ($this->dbConnection->query($createTable)) {
+        if ($conn->query($createTable)) {
             // TODO Add message
         } else {
             throw new \Exception("Something went wrong when trying to create subreddit to database");
@@ -59,6 +48,8 @@ class Database {
     }
 
     private function createPostTableIfNotExist() {
+        $conn = $this->createDbConnection();
+
         $createTable = 'CREATE TABLE IF NOT EXISTS ' . self::$postTable . ' (
                 id VARCHAR(50),
                 parent_id VARCHAR(50),
@@ -70,7 +61,7 @@ class Database {
                 created_utc VARCHAR(50)
         )';
 
-        if ($this->dbConnection->query($createTable)) {
+        if ($conn->query($createTable)) {
             // TODO Add message
         } else {
             throw new \Exception("Something went wrong when trying to create postTable :^) to database");
@@ -78,12 +69,14 @@ class Database {
     }
 
     private function createFullnameTableIfNotExist() {
+        $conn = $this->createDbConnection();
+
         $createTable = 'CREATE TABLE IF NOT EXISTS ' . self::$fullname . ' (
                 id VARCHAR(50),
                 name VARCHAR(50)
             )';
 
-        if ($this->dbConnection->query($createTable)) {
+        if ($conn->query($createTable)) {
             // TODO Add message
         } else {
             throw new \Exception("Something went wrong when trying to create fullname to database");

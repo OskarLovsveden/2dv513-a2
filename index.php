@@ -1,8 +1,5 @@
 <?php
 set_time_limit(0);
-// ignore_user_abort(1);
-// ini_set('mysql.connect_timeout', -1);
-// ini_set('default_socket_timeout', -1);
 
 require_once('Database.php');
 require_once('TableExporter.php');
@@ -18,4 +15,3 @@ try {
 } catch (\Throwable $th) {
     echo $th;
 }
-
