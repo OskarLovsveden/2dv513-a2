@@ -3,7 +3,7 @@
 class TableExporter {
     private $db;
 
-    private static $file = __DIR__ . "/jsonData/RC_2011-07.bz2";
+    private static $file = __DIR__ . "/jsonData/RC_2007-10.bz2";
     private static $titles = array(
         'id',
         'name',
@@ -49,7 +49,7 @@ class TableExporter {
                 $obj->score,
                 $obj->created_utc
             );
-            
+
 
             fputcsv($fp, $arr);
         }

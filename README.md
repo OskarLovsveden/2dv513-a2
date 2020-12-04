@@ -8,31 +8,70 @@
 
 8min
 
-SELECT COUNT(author)
-FROM post
-WHERE author = 'drinkmorecoffee'
+1.  SELECT author, COUNT(author) AS comments\
+    FROM post\
+    WHERE author = '`username`'
 
-(COUNT(subreddit_id) / 31) as comments_per_day
+    Replace `username`.
 
-SELECT (COUNT(subreddit_id) / 31) as comments_per_day
-FROM post
-JOIN subreddit ON (subreddit_id = subreddit.id)
-WHERE subreddit.name = "wow"
+2.  SELECT s.name, (COUNT(p.subreddit_id) / 31) as comments_per_day\
+    FROM post AS p\
+    JOIN subreddit s ON (p.subreddit_id = s.id\
+    WHERE s.name = '`subreddit name`'
 
-SELECT COUNT(id) as comments_with_lol
-FROM post
-WHERE body LIKE '%lol%'
+    Replace `subreddit name`.
 
-SELECT DISTINCT subreddit.name
-FROM post
-JOIN subreddit ON (post.subreddit_id = subreddit.id)
-WHERE author IN (SELECT author
-FROM post
-WHERE link_id = 't3_j5200')
+3.  SELECT COUNT(id) as comments_including_lol\
+    FROM post\
+    WHERE body LIKE '%lol%'
 
-select author
-from ( select SUM(score)
-  from post
-  order by score desc )
-  where  < 2;
-  
+4.  SELECT DISTINCT s.name\
+    FROM post p1\
+    JOIN subreddit s ON (p1.subreddit_id = s.id)\
+    WHERE p1.author IN (SELECT p2.author\
+    FROM post p2\
+    WHERE p2.link_id = '`link_id`')
+
+    Replace `link_id`.
+
+5.  (SELECT author, SUM(score) as total_score\
+    FROM post\
+    WHERE author != '[deleted]'\
+    GROUP BY author\
+    ORDER BY total_score DESC\
+    LIMIT 1)\
+    UNION\
+    (SELECT author, SUM(score) as total_score\
+    FROM post\
+    WHERE author != '[deleted]'\
+    GROUP BY author\
+    ORDER BY total_score ASC\
+    LIMIT 1)
+
+6.  (SELECT s.name, p.score\
+    FROM post p\
+    JOIN subreddit s ON (p.subreddit_id = s.id)\
+    ORDER BY p.score DESC\
+    LIMIT 1)\
+    UNION\
+    (SELECT s.name, p.score\
+    FROM post p\
+    JOIN subreddit s ON (p.subreddit_id = s.id)\
+    ORDER BY p.score ASC\
+    LIMIT 1)
+
+7.  SELECT p2.author\
+    FROM post p1, post p2\
+    WHERE p1.author = '`username`'\
+    AND p1.link_id = p2.link_id\
+    AND p2.author != '`username`'\
+    AND p2.author != '[deleted]'\
+    GROUP BY p2.author
+
+    Replace `username`.
+
+8.  SELECT author\
+    FROM post\
+    WHERE author != '[deleted]'\
+    GROUP BY author\
+    HAVING COUNT(subreddit_id) = 1
